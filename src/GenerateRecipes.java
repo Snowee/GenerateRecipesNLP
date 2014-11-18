@@ -28,7 +28,7 @@ public class GenerateRecipes {
 		Vector<String> recipes = data.recipes;
 	    Pattern re = Pattern.compile("[^.!?\\s][^.!?]*(?:[.!?](?!['\"]?\\s|$)[^.!?]*)*[.!?]?['\"]?(?=\\s|$)", Pattern.MULTILINE | Pattern.COMMENTS);
 	    Pattern filter = Pattern.compile("Source|Recipe\\s{1,}by|.*@.*|://|[R|r]ecipe|[1-9][.]|[()]|[D|d]ownloaded|Yield|[C|c]alories|[S|s]hared|[C|c]ontributor"
-	    		+ "|[SERVING|serving|Serving]\\s{0,}:");
+	    		+ "|[SERVING|serving|Serving]\\s{0,}:|[Y|y]ou|I");
 	    
 		MaxentTagger tagger = new MaxentTagger(taggerPath);
 	    DependencyParser parser = DependencyParser.loadFromModelFile(modelPath);
@@ -45,16 +45,19 @@ public class GenerateRecipes {
 					System.out.println(sentence);
 				    DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(sentence));
 				    for (List<HasWord> sentence1 : tokenizer) {
-				      List<TaggedWord> tagged = tagger.tagSentence(sentence1);
-				      GrammaticalStructure gs = parser.predict(tagged);
-				      Collection<TypedDependency> dependencies = gs.typedDependencies();
-				      Object[] dep = dependencies.toArray();
-				      for ( int j = 0; j < dep.length; j++ ) {
-				    	  System.out.println(dep[j]);
-				      }
-				      
-				      // Print typed dependencies
-				      //System.err.println(gs);
+					    List<TaggedWord> tagged = tagger.tagSentence(sentence1);
+					    GrammaticalStructure gs = parser.predict(tagged);
+					    Collection<TypedDependency> dependencies = gs.typedDependencies();
+					    int counter = 0;
+					    for ( TypedDependency dep : dependencies ) {
+					    	if( !dep.reln().toString().equals("nn") && counter == 0 )
+					    		break;
+					    	System.out.println(dep.toString());
+					    	counter++;
+					    }
+					      
+					      // Print typed dependencies
+					      //System.err.println(gs);
 				    }
 			    }
 			}
