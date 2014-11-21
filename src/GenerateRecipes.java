@@ -1,4 +1,7 @@
+import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
@@ -18,8 +21,10 @@ import edu.stanford.nlp.trees.TypedDependency;
 public class GenerateRecipes {
 
 	
-	public static void main( String args[] ) {
-	    String modelPath = DependencyParser.DEFAULT_MODEL;
+	private static final Array[] Array = null;
+
+	public static void main( String args[] ) throws IOException {
+	/*    String modelPath = DependencyParser.DEFAULT_MODEL;
 	    String taggerPath = "english-left3words-distsim.tagger";
 
 		Data data = new Data();
@@ -50,10 +55,11 @@ public class GenerateRecipes {
 					    Collection<TypedDependency> dependencies = gs.typedDependencies();
 					    int counter = 0;
 					    for ( TypedDependency dep : dependencies ) {
-					    	if( !dep.reln().toString().equals("nn") && counter == 0 )
+					    	if( !dep.reln().toString().equals("amod") && counter == 0 )
 					    		break;
 					    	System.out.println(dep.toString());
 					    	counter++;
+					    	System.out.println(counter);
 					    }
 					      
 					      // Print typed dependencies
@@ -62,7 +68,20 @@ public class GenerateRecipes {
 			    }
 			}
 			System.out.println();
-		}
+		}*/
+	
+		String sentence = "Oh hello there";
+		String quasisentence= "hello";
+		ArrayList<String> one = new ArrayList<String>();
+		one.add("tagOne");
+		one.add("tagTwo");
+		one.add("tagThree");
+		ArrayList<String> two = new ArrayList<String>();
+		two.add("tagOne");
+		two.add("tagTwo");
+		two.add("tagThree");
 		
+		JSON json = new JSON();
+		json.addToJSON(sentence, one, two, quasisentence);
 	}
 }
