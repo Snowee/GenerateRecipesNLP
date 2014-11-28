@@ -21,6 +21,7 @@ public class GenerateRecipes {
 	public static void main( String args[] ) {
 	    String modelPath = DependencyParser.DEFAULT_MODEL;
 	    String taggerPath = "english-left3words-distsim.tagger";
+	    createPredicate pred = new createPredicate();
 
 		Data data = new Data();
 		
@@ -28,30 +29,33 @@ public class GenerateRecipes {
 		Vector<String> recipes = data.recipes;
 	    Pattern re = Pattern.compile("[^.!?\\s][^.!?]*(?:[.!?](?!['\"]?\\s|$)[^.!?]*)*[.!?]?['\"]?(?=\\s|$)", Pattern.MULTILINE | Pattern.COMMENTS);
 	    Pattern filter = Pattern.compile("Source|Recipe\\s{1,}by|.*@.*|://|[R|r]ecipe|[1-9][.]|[()]|[D|d]ownloaded|Yield|[C|c]alories|[S|s]hared|[C|c]ontributor"
-	    		+ "|[SERVING|serving|Serving]\\s{0,}:");
+	    		+ "|[SERVING|serving|Serving]\\s{0,}:|[Y|y]ou|I|;|~");
 	    
 		MaxentTagger tagger = new MaxentTagger(taggerPath);
 	    DependencyParser parser = DependencyParser.loadFromModelFile(modelPath);
 		for( int i = 0; i < recipes.size(); i++ ) {
 			String instructions = data.readJSON( recipes.get(i), "Instructions"); 
-			System.out.println( instructions );
+			//System.out.println( instructions );
 			Matcher reMatcher = re.matcher(instructions);
-			System.out.println();
+			//System.out.println();
 
 			while (reMatcher.find()) {
 				String sentence = reMatcher.group();
 				Matcher filterMatcher = filter.matcher(sentence);
 			    if ( !filterMatcher.find() ) {
-					System.out.println(sentence);
+					//System.out.println(sentence);
 				    DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(sentence));
 				    for (List<HasWord> sentence1 : tokenizer) {
 				      List<TaggedWord> tagged = tagger.tagSentence(sentence1);
 				      GrammaticalStructure gs = parser.predict(tagged);
 				      Collection<TypedDependency> dependencies = gs.typedDependencies();
-				      Object[] dep = dependencies.toArray();
-				      for ( int j = 0; j < dep.length; j++ ) {
-				    	  System.out.println(dep[j]);
-				      }
+				      
+				      pred.predicate( dependencies, sentence );
+				      
+				     // Object[] dep = dependencies.toArray();
+				      //for ( int j = 0; j < dep.length; j++ ) {
+				    	//  System.out.println(dep[j]);
+				     // }
 				      
 				      // Print typed dependencies
 				      //System.err.println(gs);
