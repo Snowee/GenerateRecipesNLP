@@ -73,15 +73,18 @@ public class GenerateRecipes {
 		String sentence = "Oh hello there";
 		String quasisentence= "hello";
 		ArrayList<String> one = new ArrayList<String>();
-		one.add("tagOne");
-		one.add("tagTwo");
-		one.add("tagThree");
+		one.add("wordOne");
+		one.add("wordTwo");
+		one.add("wordThree");
 		ArrayList<String> two = new ArrayList<String>();
 		two.add("tagOne");
 		two.add("tagTwo");
 		two.add("tagThree");
-		
+
 		JSON json = new JSON();
 		json.addToJSON(sentence, one, two, quasisentence);
+		
+		IBMModel1 entries = new IBMModel1();
+		entries.EMAlgorithm();
 	}
 }
