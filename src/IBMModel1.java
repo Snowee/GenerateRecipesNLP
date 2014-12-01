@@ -25,7 +25,7 @@ public class IBMModel1 {
 		HashMap<String, Double> quasiWordsCount = new HashMap<String, Double>();
 		HashMap<ArrayList<String>, Double> wordPairCount = new HashMap<ArrayList<String>, Double>();
 		
-		//Preprocess sentences to gain access on word level.
+		// Preprocess sentences to gain access on word level.
 		for(int i = 0; i < sentenceEntries.length ; i++){
 			String realSentence = sentenceEntries[i][0];
 			String quasiSentence = sentenceEntries[i][1];
@@ -99,13 +99,7 @@ public class IBMModel1 {
 						
 						// Alter the s-total with the translation probability.
 						sTotal_e.put(wordsRealSentence2[j], sTotal_e.get(wordsRealSentence2[j]) + translationProbValue);
-						/*
-						for (Entry<String, Double> entry : sTotal_e.entrySet()) {
-							System.out.println(entry.getKey()+" : "+entry.getValue());
-						}
-						System.out.println("For loopje door");
-						System.out.println(); 
-						*/
+						
 						wordPair.clear();
 					}
 				}
@@ -135,17 +129,17 @@ public class IBMModel1 {
 			for(Entry<String, Double> quasiWord : quasiWordsCount.entrySet()){
 				double fValue = quasiWord.getValue();
 				for (Entry<ArrayList<String>, Double> wordPair : wordPairCount.entrySet()) {
-					ArrayList<String> wordPair_e = wordPair.getKey();
+					ArrayList<String> wordPair_ef = wordPair.getKey();
 					
 					Double wordPair_eValue = wordPair.getValue();
 					Double translationProbValue = wordPair_eValue/fValue;
 					
-					translationProbs.put(wordPair_e, translationProbValue);	
+					translationProbs.put(wordPair_ef, translationProbValue);	
 				}
 			}
 			s++;
 		}
-		while(s < 1);
+		while(s < 10);
 		
 		for (Entry<ArrayList<String>, Double> entry : translationProbs.entrySet()) {
 		    System.out.println(entry.getKey()+" : "+entry.getValue());
