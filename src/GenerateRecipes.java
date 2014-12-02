@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +46,8 @@ public class GenerateRecipes {
 	    
 		MaxentTagger tagger = new MaxentTagger(taggerPath);
 	    DependencyParser parser = DependencyParser.loadFromModelFile(modelPath);
-		for( int i = 0; i < recipes.size(); i++ ) {
+		int counter = 0;
+	    for( int i = 0; i < recipes.size(); i++ ) {
 		    Vector<String> tagTrigram = new Vector<String>();
 		    while( tagTrigram.size() != 3 ) {
 			    tagTrigram.add( "<START>" );
@@ -53,9 +55,10 @@ public class GenerateRecipes {
 		    
 			String instructions = data.readJSON( recipes.get(i), "Instructions"); 
 			//System.out.println( instructions );
-			Matcher reMatcher = re.matcher(instructions);
-			//System.out.println();
 
+			if( instructions != null ) {
+				Matcher reMatcher = re.matcher(instructions);
+			//System.out.println();
 			while (reMatcher.find()) {
 				String sentence = reMatcher.group();
 				Matcher filterMatcher = filter.matcher(sentence);
@@ -72,28 +75,38 @@ public class GenerateRecipes {
 					    ArrayList<ArrayList<ArrayList<String>>> predicates = createPredicates( dependencies, sentence );
 					    ArrayList<ArrayList<String>> predicate = new ArrayList<ArrayList<String>>();
 					    ArrayList<ArrayList<String>> abstractPred = new ArrayList<ArrayList<String>>();
-					    if( predicates.size() > 0 ) {
+					    if( predicates.size() == 2 ) {
 					    	predicate = predicates.get(0);
 					    	abstractPred = predicates.get(1);
 					    }
+//					    System.out.println(counter);
 					    if( predicate.size() > 0 ) {
-//							System.out.println(sentence);
-////							for ( TypedDependency dep : dependencies ) {
-////								System.out.println(dep.toString());
-////							}
-//					    	String quasiSentence = arraylistToString( predicate );
-					    	String tagSentence = arraylistsToString( abstractPred );
-//					    	System.out.println( quasiSentence );
-//					    	System.out.println( tagSentence );
-//					    	System.out.println();
-					    	tagTrigram = addElement( tagTrigram, tagSentence );
-					    	if( tagTrigram.size() == 3 ) {
-					    		updateTagFreq( tagTrigram );
-					    	}
+					    	String quasiSentence = arraylistsToString( predicate );
+
+					    	sentence = sentence.replaceAll( "\\s+", " " );
+					    	sentence = sentence.toLowerCase();
 					    	
-					    	Vector<Integer> verbIndices = verbIndices( abstractPred );
-					    	updateVerbFreq( verbIndices, predicate );
-					    	updateVerbSentenceFrequencies( predicate, abstractPred );
+					    	quasiSentence = quasiSentence.toLowerCase();
+					    	if( !quasiSentence.equals("") ) {
+						    	JSON json = new JSON();
+						    	try {
+									json.addToJSON( sentence, quasiSentence, counter );
+									counter++;
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+					    	}
+					    
+					    
+//					    	tagTrigram = addElement( tagTrigram, tagSentence );
+//					    	if( tagTrigram.size() == 3 ) {
+//					    		updateTagFreq( tagTrigram );
+//					    	}
+//					    	
+//					    	Vector<Integer> verbIndices = verbIndices( abstractPred );
+//					    	updateVerbFreq( verbIndices, predicate );
+//					    	updateVerbSentenceFrequencies( predicate, abstractPred );
 					    }
 					    
 					      
@@ -102,10 +115,11 @@ public class GenerateRecipes {
 				    }
 
 			    }
-			}
-		    tagTrigram = addElement( tagTrigram, "<STOP>" );
-		    updateTagFreq( tagTrigram );			
 			
+			}
+//		    tagTrigram = addElement( tagTrigram, "<STOP>" );
+//		    updateTagFreq( tagTrigram );			
+			}	
 			//System.out.println();
 		}
 		
@@ -215,7 +229,7 @@ public class GenerateRecipes {
 		int counter = 0;
 		String verb = "";
 		String dobj = "";
-		System.out.println(string);
+		//System.out.println(string);
 //		for ( TypedDependency dep : dependencies ) {
 //			System.out.println(dep);
 //		}
@@ -265,12 +279,9 @@ public class GenerateRecipes {
 					predicate.add( predicates.get(0) );
 					abstractPred.add( predicates.get(1) );
 				}
-				if( verbConj.size() > 1)
-					System.out.println();
 				outputPredicates.add( predicate );
 				outputPredicates.add( abstractPred );
 				
-				//outputPredicates = predicate( dependencies, string );
 				notFinished = false;
 			}
 		}
@@ -503,7 +514,7 @@ public class GenerateRecipes {
 			System.out.println(sen);
 			System.out.println(abstractSen);
 			//System.out.println(abstractPredicate);
-			System.out.println();
+			;
 
 		}
 		return returnSentences;
