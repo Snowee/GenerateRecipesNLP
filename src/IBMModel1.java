@@ -20,16 +20,96 @@ public class IBMModel1 {
 	public void EMAlgorithm() throws IOException{
 		
 		Map<String, Double> transProb = new HashMap<String, Double>();
+		ArrayList<String> allSourceWords = new ArrayList<String>();
+		Map<String, Double> sTotalE = new HashMap<String, Double>();  
+		Map<String, Double> transCount = new HashMap<String, Double>();
+		Map<String, Double> targetCount = new HashMap<String, Double>();
 		
 		String[][] sentenceEntries = createEntries();
 		
 		for( int i = 0; i < sentenceEntries.length; i++ ) {
 			String[] sentencePair = sentenceEntries[i];
-			for( int j = 0; j < sentencePair.length; j++ ){
-				
+			String sentence1 = sentencePair[0];
+			String sentence2 = sentencePair[1];
+			
+			String[] sentence1Split = sentence1.split(" ");
+			String[] sentence2Split = sentence2.split(" ");
+			
+			for( int m = 0; m < sentence1Split.length; m++ ) {
+				for( int n = 0; n < sentence2Split.length; n++ ) {
+					String key = sentence1Split[m] + "_" + sentence2Split[n];
+					transProb.put( key, 0.25 );
+					transCount.put( key, 0.0 );
+							
+					String sourceWord = sentence1Split[m];
+					if( !allSourceWords.contains( sourceWord ) ) {
+						allSourceWords.add( sourceWord );
+					}
+					String targetWord = sentence2Split[n];
+					targetCount.put(targetWord, 0.0);
+				}
 			}
+
 		}
 		
+		
+		int nrOfIters = 10;
+		for( int k = 0; k < nrOfIters; k++ ) {
+			for( Map.Entry<String, Double> entry : transCount.entrySet() ) {
+				transCount.put( entry.getKey(), 0.0 );
+			}
+			for( Map.Entry<String, Double> entry : targetCount.entrySet() ) {
+				targetCount.put( entry.getKey(), 0.0 );
+			}
+			
+			for( int i = 0; i < sentenceEntries.length; i++ ) {
+				String[] sentencePair = sentenceEntries[i];
+				String sentence1 = sentencePair[0];
+				String sentence2 = sentencePair[1];
+				
+				String[] sentence1Split = sentence1.split(" ");
+				String[] sentence2Split = sentence2.split(" ");
+				
+				sTotalE.clear();
+				for( int n = 0; n < sentence1Split.length; n++ ) {
+					sTotalE.put( sentence1Split[n], 0.0 );
+				}
+				for( int n = 0; n < sentence1Split.length; n++ ) {
+					for( int m = 0; m < sentence2Split.length; m++ ) {
+						String key = sentence1Split[n] + "_" + sentence2Split[m];
+						sTotalE.put(sentence1Split[n], sTotalE.get(sentence1Split[n]) + transProb.get(key));
+					}
+				}
+				
+				for( int n = 0; n < sentence1Split.length; n++ ) {
+					for( int m = 0; m < sentence2Split.length; m++ ) {
+						String key = sentence1Split[n] + "_" + sentence2Split[m];
+						String sourceWord = sentence1Split[n];
+						String targetWord = sentence2Split[m];
+						
+						transCount.put( key, transCount.get(key) + (transProb.get(key)/sTotalE.get(sourceWord)) );
+						targetCount.put(targetWord, targetCount.get(targetWord) + (transProb.get(key)/sTotalE.get(sourceWord)) );
+					}
+				}
+				
+			}
+			
+			for( int i = 0; i < allSourceWords.size(); i++ ) {
+				for( Map.Entry<String, Double> entry : targetCount.entrySet() ) { 
+					String key = allSourceWords.get(i) + "_" + entry.getKey();
+					if( transProb.containsKey(key) ) {
+						transProb.put( key, transCount.get(key)/targetCount.get(entry.getKey()));
+					}
+				}
+			}
+			
+		}
+		
+	for (Entry<String, Double> entry : transProb.entrySet()) {
+		if( entry.getValue() > .7 ) {
+			System.out.println(entry.getKey()+" : "+entry.getValue());
+		}
+	}
 		
 		
 //		int s = 0;

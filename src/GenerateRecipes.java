@@ -32,6 +32,13 @@ public class GenerateRecipes {
 //			new HashMap<String, Integer>();
 	
 	public static void main( String args[] ) {
+		IBMModel1 ibm = new IBMModel1();
+		try {
+			ibm.EMAlgorithm();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
 		verbToSentenceFrequencies = 
 				new HashMap<String, Map<String, Map<String, Integer>>>();
 	    String modelPath = DependencyParser.DEFAULT_MODEL;
