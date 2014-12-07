@@ -30,104 +30,123 @@ public class GenerateRecipes {
 //			new HashMap<String, Map<String, Integer>>();
 //	private static Map<String, Integer> sentenceFrequencies = 
 //			new HashMap<String, Integer>();
+	private static boolean ibm = true;
+	private static boolean distributions = false;
+	
 	
 	public static void main( String args[] ) {
-		IBMModel1 ibm = new IBMModel1();
-		try {
-			ibm.EMAlgorithm();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		if( ibm ) {
+			Map<String, Double> transProb =
+					new HashMap<String, Double>();
+			List<String> alignments = new ArrayList<String>();
+			boolean fwd = false;
+			
+			IBMModel1 ibm = new IBMModel1();
+			try {
+				transProb = ibm.EMAlgorithm( fwd );
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			try {
+				 alignments = ibm.wordAlignmentViterbi( transProb, fwd );
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			ibm.writeAlignmentToFile(alignments, "pred-sent.rev");
 		}
 		
-		verbToSentenceFrequencies = 
-				new HashMap<String, Map<String, Map<String, Integer>>>();
-	    String modelPath = DependencyParser.DEFAULT_MODEL;
-	    String taggerPath = "english-left3words-distsim.tagger";
-		Data data = new Data();
-		
-		data.getContents();
-		Vector<String> recipes = data.recipes;
-	    Pattern re = Pattern.compile("[^.!?\\s][^.!?]*(?:[.!?](?!['\"]?\\s|$)[^.!?]*)*[.!?]?['\"]?(?=\\s|$)|\\s{3,}", Pattern.MULTILINE | Pattern.COMMENTS);
-	    Pattern filter = Pattern.compile("Source|Recipe\\s{1,}by|.*@.*|://|[R|r]ecipe|[1-9][.]|[()]|[D|d]ownloaded|Yield|[C|c]alories|[S|s]hared|[C|c]ontributor"
-	    		+ "|[SERVING|serving|Serving]\\s{0,}:|[Y|y]ou|I|;|~");
-	    
-		MaxentTagger tagger = new MaxentTagger(taggerPath);
-	    DependencyParser parser = DependencyParser.loadFromModelFile(modelPath);
-		int counter = 0;
-	    for( int i = 0; i < recipes.size(); i++ ) {
-		    Vector<String> tagTrigram = new Vector<String>();
-		    while( tagTrigram.size() != 3 ) {
-			    tagTrigram.add( "<START>" );
-		    }
-		    
-			String instructions = data.readJSON( recipes.get(i), "Instructions"); 
-			//System.out.println( instructions );
-
-			if( instructions != null ) {
-				Matcher reMatcher = re.matcher(instructions);
-			//System.out.println();
-			while (reMatcher.find()) {
-				String sentence = reMatcher.group();
-				Matcher filterMatcher = filter.matcher(sentence);
-			    if ( !filterMatcher.find() ) {
-				    DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(sentence));
-				    for (List<HasWord> sentence1 : tokenizer) {
-					    List<TaggedWord> tagged = tagger.tagSentence(sentence1);
-					    GrammaticalStructure gs = parser.predict(tagged);
-					    Collection<TypedDependency> dependencies = gs.typedDependencies();
-					    //for ( TypedDependency dep : dependencies ) {
-							//System.out.println(dep.toString());
-						//}
-					    //System.out.println();
-					    ArrayList<ArrayList<ArrayList<String>>> predicates = createPredicates( dependencies, sentence );
-					    ArrayList<ArrayList<String>> predicate = new ArrayList<ArrayList<String>>();
-					    ArrayList<ArrayList<String>> abstractPred = new ArrayList<ArrayList<String>>();
-					    if( predicates.size() == 2 ) {
-					    	predicate = predicates.get(0);
-					    	abstractPred = predicates.get(1);
-					    }
-//					    System.out.println(counter);
-					    if( predicate.size() > 0 ) {
-					    	String quasiSentence = arraylistsToString( predicate );
-
-					    	sentence = sentence.replaceAll( "\\s+", " " );
-					    	sentence = sentence.toLowerCase();
-					    	
-					    	quasiSentence = quasiSentence.toLowerCase();
-					    	if( !quasiSentence.equals("") ) {
-						    	JSON json = new JSON();
-						    	try {
-									json.addToJSON( sentence, quasiSentence, counter );
-									counter++;
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-					    	}
-					    
-					    
-//					    	tagTrigram = addElement( tagTrigram, tagSentence );
-//					    	if( tagTrigram.size() == 3 ) {
-//					    		updateTagFreq( tagTrigram );
-//					    	}
-//					    	
-//					    	Vector<Integer> verbIndices = verbIndices( abstractPred );
-//					    	updateVerbFreq( verbIndices, predicate );
-//					    	updateVerbSentenceFrequencies( predicate, abstractPred );
-					    }
-					    
-					      
-					      // Print typed dependencies
-					      //System.err.println(gs);
-				    }
-
-			    }
+		if( distributions ) {
+			verbToSentenceFrequencies = 
+					new HashMap<String, Map<String, Map<String, Integer>>>();
+		    String modelPath = DependencyParser.DEFAULT_MODEL;
+		    String taggerPath = "english-left3words-distsim.tagger";
+			Data data = new Data();
 			
+			data.getContents();
+			Vector<String> recipes = data.recipes;
+		    Pattern re = Pattern.compile("[^.!?\\s][^.!?]*(?:[.!?](?!['\"]?\\s|$)[^.!?]*)*[.!?]?['\"]?(?=\\s|$)|\\s{3,}", Pattern.MULTILINE | Pattern.COMMENTS);
+		    Pattern filter = Pattern.compile("Source|Recipe\\s{1,}by|.*@.*|://|[R|r]ecipe|[1-9][.]|[()]|[D|d]ownloaded|Yield|[C|c]alories|[S|s]hared|[C|c]ontributor"
+		    		+ "|[SERVING|serving|Serving]\\s{0,}:|[Y|y]ou|I|;|~");
+		    
+			MaxentTagger tagger = new MaxentTagger(taggerPath);
+		    DependencyParser parser = DependencyParser.loadFromModelFile(modelPath);
+			int counter = 0;
+		    for( int i = 0; i < recipes.size(); i++ ) {
+			    Vector<String> tagTrigram = new Vector<String>();
+			    while( tagTrigram.size() != 3 ) {
+				    tagTrigram.add( "<START>" );
+			    }
+			    
+				String instructions = data.readJSON( recipes.get(i), "Instructions"); 
+				//System.out.println( instructions );
+	
+				if( instructions != null ) {
+					Matcher reMatcher = re.matcher(instructions);
+				//System.out.println();
+				while (reMatcher.find()) {
+					String sentence = reMatcher.group();
+					Matcher filterMatcher = filter.matcher(sentence);
+				    if ( !filterMatcher.find() ) {
+					    DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(sentence));
+					    for (List<HasWord> sentence1 : tokenizer) {
+						    List<TaggedWord> tagged = tagger.tagSentence(sentence1);
+						    GrammaticalStructure gs = parser.predict(tagged);
+						    Collection<TypedDependency> dependencies = gs.typedDependencies();
+						    //for ( TypedDependency dep : dependencies ) {
+								//System.out.println(dep.toString());
+							//}
+						    //System.out.println();
+						    ArrayList<ArrayList<ArrayList<String>>> predicates = createPredicates( dependencies, sentence );
+						    ArrayList<ArrayList<String>> predicate = new ArrayList<ArrayList<String>>();
+						    ArrayList<ArrayList<String>> abstractPred = new ArrayList<ArrayList<String>>();
+						    if( predicates.size() == 2 ) {
+						    	predicate = predicates.get(0);
+						    	abstractPred = predicates.get(1);
+						    }
+	//					    System.out.println(counter);
+						    if( predicate.size() > 0 ) {
+						    	String quasiSentence = arraylistsToString( predicate );
+	
+						    	sentence = sentence.replaceAll( "\\s+", " " );
+						    	sentence = sentence.toLowerCase();
+						    	
+						    	quasiSentence = quasiSentence.toLowerCase();
+						    	if( !quasiSentence.equals("") ) {
+							    	JSON json = new JSON();
+							    	try {
+										json.addToJSON( sentence, quasiSentence, counter );
+										counter++;
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+						    	}
+						    
+						    
+	//					    	tagTrigram = addElement( tagTrigram, tagSentence );
+	//					    	if( tagTrigram.size() == 3 ) {
+	//					    		updateTagFreq( tagTrigram );
+	//					    	}
+	//					    	
+	//					    	Vector<Integer> verbIndices = verbIndices( abstractPred );
+	//					    	updateVerbFreq( verbIndices, predicate );
+	//					    	updateVerbSentenceFrequencies( predicate, abstractPred );
+						    }
+						    
+						      
+						      // Print typed dependencies
+						      //System.err.println(gs);
+					    }
+	
+				    }
+				
+				}
+	//		    tagTrigram = addElement( tagTrigram, "<STOP>" );
+	//		    updateTagFreq( tagTrigram );			
+				}	
+				//System.out.println();
 			}
-//		    tagTrigram = addElement( tagTrigram, "<STOP>" );
-//		    updateTagFreq( tagTrigram );			
-			}	
-			//System.out.println();
 		}
 		
 	}
