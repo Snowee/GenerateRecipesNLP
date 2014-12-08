@@ -58,6 +58,38 @@ public class IBMModel1 {
 		
 		return sentenceAlignments;
 	}
+	
+	
+	public void writeTextToFile() {
+		
+		try {
+			File file = new File( "text.txt" );
+			
+			if( !file.exists() ) {
+				file.createNewFile();
+			} else {
+				file.delete();
+				file.createNewFile();
+			}
+			
+			FileWriter fw = new FileWriter( file.getAbsoluteFile() );
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			String[][] sentenceEntries = getEntriesFromJSON( true );
+			for( int i = 0; i < sentenceEntries.length; i++ ) {
+				String sentence = sentenceEntries[i][1];
+				bw.write(sentence);
+				bw.newLine();
+			}
+			bw.close();
+			
+		} catch ( IOException e) {
+			e.printStackTrace();
+		}
+	
+	}
+	
+	
 
 	public void writeAlignmentToFile( List<String> alignments, String name ) {
 		

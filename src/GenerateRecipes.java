@@ -42,6 +42,9 @@ public class GenerateRecipes {
 			boolean fwd = false;
 			
 			IBMModel1 ibm = new IBMModel1();
+			
+			ibm.writeTextToFile();
+			
 			try {
 				transProb = ibm.EMAlgorithm( fwd );
 			} catch (IOException e1) {
