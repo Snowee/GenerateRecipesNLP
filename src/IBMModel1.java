@@ -27,7 +27,8 @@ public class IBMModel1 {
 		List<String> sentenceAlignments = 
 				new ArrayList<String>();
 		
-		String[][] sentenceEntries = createEntries( fwd );
+//		String[][] sentenceEntries = createEntries( fwd );
+		String[][] sentenceEntries = getEntriesFromJSON( fwd );
 		for( int i = 0; i < sentenceEntries.length; i++ ) {
 			String alignment = "";
 			String[] sentencePair = sentenceEntries[i];
@@ -95,8 +96,8 @@ public class IBMModel1 {
 		Map<String, Double> transCount = new HashMap<String, Double>();
 		Map<String, Double> targetCount = new HashMap<String, Double>();
 		
-		String[][] sentenceEntries = createEntries( fwd );
-//		String[][] sentenceEntries = getEntriesFromJSON();
+//		String[][] sentenceEntries = createEntries( fwd );
+		String[][] sentenceEntries = getEntriesFromJSON( fwd );
 		
 		for( int i = 0; i < sentenceEntries.length; i++ ) {
 			String[] sentencePair = sentenceEntries[i];
@@ -124,7 +125,7 @@ public class IBMModel1 {
 		}
 		
 		
-		int nrOfIters = 5;
+		int nrOfIters = 15;
 		for( int k = 0; k < nrOfIters; k++ ) {
 			for( Map.Entry<String, Double> entry : transCount.entrySet() ) {
 				transCount.put( entry.getKey(), 0.0 );
@@ -192,7 +193,7 @@ public class IBMModel1 {
 		return transProb;
 	}	
 	
-	public String[][] getEntriesFromJSON(){
+	public String[][] getEntriesFromJSON( boolean fwd ){
 		JSONParser parser = new JSONParser();
 		int len = new File("C:\\Users\\NLP\\Entries").listFiles().length; 
 		String[][] sentenceEntries = new String[len][2];
@@ -208,9 +209,13 @@ public class IBMModel1 {
 
 				String quasiSentence = (String) jsonObject.get("Quasi-Sentence");
 				//System.out.println(quasiSentence);
-	 
-				sentenceEntries[i][0] = quasiSentence;
-				sentenceEntries[i][1] = realSentence;
+				if( fwd ) {
+					sentenceEntries[i][0] = quasiSentence;
+					sentenceEntries[i][1] = realSentence;
+				} else {
+					sentenceEntries[i][1] = quasiSentence;
+					sentenceEntries[i][0] = realSentence;
+				}
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

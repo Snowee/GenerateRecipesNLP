@@ -39,7 +39,7 @@ public class GenerateRecipes {
 			Map<String, Double> transProb =
 					new HashMap<String, Double>();
 			List<String> alignments = new ArrayList<String>();
-			boolean fwd = false;
+			boolean fwd = true;
 			
 			IBMModel1 ibm = new IBMModel1();
 			try {
@@ -53,7 +53,7 @@ public class GenerateRecipes {
 				e.printStackTrace();
 			}
 			
-			ibm.writeAlignmentToFile(alignments, "pred-sent.rev");
+			ibm.writeAlignmentToFile(alignments, "pred-sent.fwd");
 		}
 		
 		if( distributions ) {
