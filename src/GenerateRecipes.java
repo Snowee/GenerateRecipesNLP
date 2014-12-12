@@ -72,7 +72,7 @@ public class GenerateRecipes {
 			System.out.println();
 		}*/
 			
-		IBMModel1 entries = new IBMModel1();
-		entries.EMAlgorithm();
+		AlignmentEvaluation A = new AlignmentEvaluation();
+		A.score();
 	}
 }
